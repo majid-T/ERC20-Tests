@@ -136,4 +136,48 @@ contract("StandardERC20", (accounts) => {
       "The receipient1's balance is not as expected"
     );
   });
+
+  //function allowance(address owner, address spender) public override view  returns(uint256) {
+  // return _allowances[owner][spender];
+  // }
+  it("should increase allowance by calling increaseAllowance(spender,value)", async () => {
+    // 1.call function increase
+    // 2.call allowance
+    // 3. check for event
+    const spenderAllowanceBefore = await standardERC20Instance.allowance.call(
+      receipient1,
+      spender
+    );
+
+    const tx = await standardERC20Instance.increaseAllowance(
+      spender,
+      spenderAmount,
+      { from: creator }
+    );
+
+    const spenderAllowanceAfter = await standardERC20Instance.allowance.call(
+      creator,
+      spender
+    );
+
+    const exp = new BigNumber(spenderAllowanceAfter).add;
+
+    assert(
+      new BigNumber(spenderAllowanceAfter).gt(
+        new BigNumber(spenderAllowanceBefore)
+      ),
+      "should be more than before"
+    );
+
+    assert(
+      new BigNumber(spenderAllowanceAfter).minus(
+        new BigNumber(spenderAmount).eq(new BigNumber(spenderAllowanceBefore))
+      ),
+      "should be added as amount"
+    );
+  });
+
+  // it("should decrease allowance by calling decreasesAllowance(spender,value)", async () => {
+  //   assert(1 == 2, "should match");
+  // });
 });
