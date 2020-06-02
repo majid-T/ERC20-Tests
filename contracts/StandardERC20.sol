@@ -208,7 +208,30 @@ contract StandardERC20 is IERC20 {
 
     //     Write an ERC20 compliant contract with test cases using truffle with two additional functionalities as follows:
 
-    // 1. increaseAllowance(address spender, uint256 addedValue) - Atomatically increases the allowance granted by spender to caller
+    // 1. Atomatically increases the allowance granted by spender to caller
+    function increaseAllowance(address spender, uint256 addedValue)
+        public
+        returns (bool)
+    {
+        _approve(
+            msg.sender,
+            spender,
+            _allowances[msg.sender][spender] + addedValue
+        );
+        return true;
+    }
 
-    // 2. decreaseAllowance(address spender, uint256 addedValue)- Atomatically decreases the allowance granted by spender to caller
+    // 2.  Atomatically decreases the allowance granted by spender to caller
+
+    function decreaseAllowance(address spender, uint256 addedValue)
+        public
+        returns (bool)
+    {
+        _approve(
+            msg.sender,
+            spender,
+            _allowances[msg.sender][spender] - addedValue
+        );
+        return true;
+    }
 }
