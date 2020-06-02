@@ -137,19 +137,14 @@ contract("StandardERC20", (accounts) => {
     );
   });
 
-  //function allowance(address owner, address spender) public override view  returns(uint256) {
-  // return _allowances[owner][spender];
-  // }
-  it("should increase allowance by calling increaseAllowance(spender,value)", async () => {
-    // 1.call function increase
-    // 2.call allowance
-    // 3. check for event
+  // Tests for function increaseAllowance(address spender, uint256 addedValue)
+  it("should increase allowance by calling increaseAllowance(spender,value) and emit event", async () => {
     const spenderAllowanceBefore = await standardERC20Instance.allowance.call(
-      receipient1,
+      creator,
       spender
     );
 
-    const tx = await standardERC20Instance.increaseAllowance(
+    const increaseTx = await standardERC20Instance.increaseAllowance(
       spender,
       spenderAmount,
       { from: creator }
@@ -159,8 +154,6 @@ contract("StandardERC20", (accounts) => {
       creator,
       spender
     );
-
-    const exp = new BigNumber(spenderAllowanceAfter).add;
 
     assert(
       new BigNumber(spenderAllowanceAfter).gt(
@@ -175,9 +168,58 @@ contract("StandardERC20", (accounts) => {
       ),
       "should be added as amount"
     );
+
+    truffleAssert.eventEmitted(increaseTx, "Approval", (obj) => {
+      return (
+        obj.owner === creator &&
+        obj.spender === spender &&
+        new BigNumber(spenderAllowanceBefore)
+          .plus(spenderAmount)
+          .isEqualTo(new BigNumber(obj.value))
+      );
+    });
   });
 
-  // it("should decrease allowance by calling decreasesAllowance(spender,value)", async () => {
-  //   assert(1 == 2, "should match");
-  // });
+  // Tests for function decreaseAllowance(address spender, uint256 addedValue)
+  it("should decrease allowance by calling decreasesAllowance(spender,value) and emit event", async () => {
+    const spenderAllowanceBefore = await standardERC20Instance.allowance.call(
+      creator,
+      spender
+    );
+
+    const decreaseTx = await standardERC20Instance.decreaseAllowance(
+      spender,
+      spenderAmount,
+      { from: creator }
+    );
+
+    const spenderAllowanceAfter = await standardERC20Instance.allowance.call(
+      creator,
+      spender
+    );
+
+    assert(
+      new BigNumber(spenderAllowanceAfter).lt(
+        new BigNumber(spenderAllowanceBefore)
+      ),
+      "should be less than before"
+    );
+
+    assert(
+      new BigNumber(spenderAllowanceAfter).plus(
+        new BigNumber(spenderAmount).eq(new BigNumber(spenderAllowanceBefore))
+      ),
+      "should be substracted as amount"
+    );
+
+    truffleAssert.eventEmitted(decreaseTx, "Approval", (obj) => {
+      return (
+        obj.owner === creator &&
+        obj.spender === spender &&
+        new BigNumber(spenderAllowanceBefore)
+          .minus(spenderAmount)
+          .isEqualTo(new BigNumber(obj.value))
+      );
+    });
+  });
 });
